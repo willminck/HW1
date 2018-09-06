@@ -1,6 +1,6 @@
-# Homework 1 - SI 364 F17
+# Homework 1 - SI 364 F18
 
-## DEADLINE: Sunday January 14, 2017 at 11:59 PM
+## DEADLINE: Sunday September 16, 2018 at 11:59 PM
 
 ## Instructions
 
