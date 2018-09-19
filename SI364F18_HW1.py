@@ -11,7 +11,10 @@
 ## [PROBLEM 1] - 150 points
 ## Below is code for one of the simplest possible Flask applications. Edit the code so that once you run this application locally and go to the URL 'http://localhost:5000/class', you see a page that says "Welcome to SI 364!"
 
-from flask import Flask
+import requests
+import json
+
+from flask import Flask, render_template, request
 app = Flask(__name__)
 app.debug = True
 
@@ -19,6 +22,69 @@ app.debug = True
 def hello_to_you():
     return 'Hello!'
 
+@app.route('/class')
+def welcome_to_you():
+    return 'Welcome to SI 364!'
+
+@app.route('/movie/<title>')
+def get_stuff(title):
+    baseurl = 'https://itunes.apple.com/search'
+    req = requests.get(baseurl, params={'term': title})
+    return str(json.loads(req.text))
+
+@app.route('/question')
+def formView():
+    html_form = '''
+    <html>
+    <body>
+    <form action= "/result" method='POST'>
+        <label>What is your favorite number?<br></label>
+        <input type="int" name="favorite"></input>
+        <input type="submit" name="Submit"></input>
+    </form>
+    </body>
+    </html>
+    '''
+    return html_form
+
+@app.route('/result', methods = ['GET', 'POST'])
+def resultView():
+    if request.method == "POST":
+        number = request.form.get("favorite", "Didn't get anything")
+        double = 2 * int(number)
+    return "Double your favorite number is {}".format(double)
+
+@app.route('/problem4form')
+def form_func():
+    html_form = '''
+    <html>
+    <body>
+    <form action="" method='GET'>
+        <label>Which Star Wars character do you like?<br></label>
+        <input type="text" name="character"></input><br>
+        <input type="checkbox" name="height"> Height <br></input>
+        <input type="checkbox" name="hair"> Hair Color <br></input>
+        <input type="submit" name="Submit"></input>
+    </form>
+    </body>
+    </html>
+    '''
+    character = request.args.get("character", "")
+    height = request.args.get("height", "")
+    hair = request.args.get("hair", "")
+    req = requests.get("https://swapi.co/api/people", params={'search': character})
+    data = json.loads(req.text)
+    if height == 'on' and hair == 'on':
+        height, hair = (data['results'][0]['height'], data['results'][0]['hair_color'])
+        return html_form + "{} is {} and has {} hair.".format(character, height, hair)
+    elif height == 'on':
+        height = data['results'][0]['height']
+        return html_form + "{} is {}.".format(character, height)
+    elif hair == 'on':
+        height = data['results'][0]['hair_color']
+        return html_form + "{} has {} hair.".format(character, hair)
+    else:
+        return html_form + character
 
 if __name__ == '__main__':
     app.run()
